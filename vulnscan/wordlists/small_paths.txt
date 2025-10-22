@@ -1,0 +1,21 @@
+# Minimal safe wordlist (keep small)
+admin
+login
+logout
+search
+api
+static
+assets
+images
+css
+js
+includes
+uploads
+files
+docs
+configuration
+config
+system
+backup
+portal
+sso

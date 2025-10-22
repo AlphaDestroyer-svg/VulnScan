@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VulnScan Dashboard</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <script src="/static/i18n.js"></script>
+</head>
+<body>
+    <div class="sidebar">
+        <div class="logo">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                <path d="M12 2L2 7L12 12L22 7L12 2Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M2 17L12 22L22 17" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M2 12L12 17L22 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            <span>VulnScan</span>
+        </div>
+        <nav>
+            <a href="#" class="active">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                    <rect x="3" y="3" width="7" height="7" stroke="currentColor" stroke-width="2"/>
+                    <rect x="14" y="3" width="7" height="7" stroke="currentColor" stroke-width="2"/>
+                    <rect x="14" y="14" width="7" height="7" stroke="currentColor" stroke-width="2"/>
+                    <rect x="3" y="14" width="7" height="7" stroke="currentColor" stroke-width="2"/>
+                </svg>
+                <span data-i18n="dashboard">Dashboard</span>
+            </a>
+            <a href="#" onclick="showScansView(); return false;">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                    <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/>
+                    <path d="M12 6V12L16 14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                </svg>
+                <span data-i18n="scans">Сканы</span>
+            </a>
+            <a href="#" onclick="showRisksView(); return false;">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                    <path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <line x1="12" y1="9" x2="12" y2="13" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                    <line x1="12" y1="17" x2="12.01" y2="17" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                </svg>
+                <span data-i18n="risks">Риски</span>
+            </a>
+        </nav>
+        <div class="lang-switcher">
+            <button class="lang-btn" data-lang="ru" onclick="setLanguage('ru')">RU</button>
+            <button class="lang-btn" data-lang="en" onclick="setLanguage('en')">EN</button>
+        </div>
+    </div>
+
+    <div class="main-content">
+        <header>
+            <h1 id="headerTitle" data-i18n="dashboard">Dashboard</h1>
+            <div class="header-actions">
+                <span class="scan-status" id="scanStatus">
+                    <span class="status-dot"></span>
+                    <span id="scanStatusText">0 scans in progress</span>
+                </span>
+                <button class="btn-primary" onclick="showNewScanModal()">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                        <line x1="12" y1="5" x2="12" y2="19" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                        <line x1="5" y1="12" x2="19" y2="12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                    </svg>
+                    <span data-i18n="newScan">Новый скан</span>
+                </button>
+            </div>
+        </header>
+
+        <div id="dashboardView">
+            <div class="stats-grid">
+                <div class="stat-card critical">
+                    <div class="stat-label" data-i18n="critical">Critical</div>
+                    <div class="stat-value" id="criticalCount">0</div>
+                </div>
+                <div class="stat-card high">
+                    <div class="stat-label" data-i18n="high">High</div>
+                    <div class="stat-value" id="highCount">0</div>
+                </div>
+                <div class="stat-card medium">
+                    <div class="stat-label" data-i18n="medium">Medium</div>
+                    <div class="stat-value" id="mediumCount">0</div>
+                </div>
+                <div class="stat-card low">
+                    <div class="stat-label" data-i18n="low">Low</div>
+                    <div class="stat-value" id="lowCount">0</div>
+                </div>
+                <div class="stat-card info">
+                    <div class="stat-label" data-i18n="info">Info</div>
+                    <div class="stat-value" id="infoCount">0</div>
+                </div>
+            </div>
+
+            <div style="text-align: center; margin: -16px 0 24px 0;">
+                <small style="color: var(--text-secondary); font-size: 12px;" data-i18n="dashboardNote">
+                    Dashboard показывает статистику последнего завершённого скана. Кликните на скан для детальной информации.
+                </small>
+            </div>
+
+            <div class="content-grid">
+                <div class="card">
+                    <div class="card-header">
+                        <h2 data-i18n="recentScans">Recent Scans</h2>
+                        <a href="#" onclick="showScansView(); return false;" data-i18n="seeAllScans">See all scans →</a>
+                    </div>
+                    <div class="scan-list" id="recentScans">
+                        <div class="empty-state" data-i18n="noScansYetClickNew">No scans yet. Click "New Scan" to start.</div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h2 data-i18n="recentRisks">Recent Risks</h2>
+                        <a href="#" onclick="showRisksView(); return false;" data-i18n="seeAllRisks">See all risks →</a>
+                    </div>
+                    <div class="risk-list" id="recentRisks">
+                        <div class="empty-state" data-i18n="noRisksYet">No risks detected yet.</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="scansView" style="display:none;">
+            <div class="card">
+                <div class="card-header">
+                    <h2 data-i18n="allScans">All Scans</h2>
+                </div>
+                <div class="scan-list" id="allScans"></div>
+            </div>
+        </div>
+
+        <div id="risksView" style="display:none;">
+            <div class="card">
+                <div class="card-header">
+                    <h2 data-i18n="allRisks">All Risks</h2>
+                    <div class="filter-tabs">
+                        <button class="filter-tab active" onclick="filterRisks('all')">All</button>
+                        <button class="filter-tab" onclick="filterRisks('critical')">Critical</button>
+                        <button class="filter-tab" onclick="filterRisks('high')">High</button>
+                        <button class="filter-tab" onclick="filterRisks('medium')">Medium</button>
+                        <button class="filter-tab" onclick="filterRisks('low')">Low</button>
+                    </div>
+                </div>
+                <div class="risk-list-detailed" id="allRisks"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- New Scan Modal -->
+    <div id="newScanModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 data-i18n="newScanTitle">New Scan</h2>
+                <button class="modal-close" onclick="closeNewScanModal()">×</button>
+            </div>
+            <form id="newScanForm" onsubmit="submitNewScan(event)">
+                <div class="form-group">
+                    <label><span data-i18n="targetUrl">Target URL</span> <span data-i18n="required">*</span></label>
+                    <input type="url" id="scanUrl" data-i18n="targetUrlPlaceholder" placeholder="https://target/" required>
+                </div>
+                <div class="form-group">
+                    <label>Profile</label>
+                    <select id="scanProfile">
+                        <option value="full">Full (all modules)</option>
+                        <option value="light">Light (headers, paths, xss)</option>
+                        <option value="hardening">Hardening (security headers)</option>
+                        <option value="api">API (jsmap, apis, cors, reflect)</option>
+                        <option value="custom">Custom modules</option>
+                    </select>
+                </div>
+                <div class="form-group" id="customModulesGroup" style="display:none;">
+                    <label>Custom Modules (comma separated)</label>
+                    <input type="text" id="scanModules" placeholder="headers,paths,xss">
+                </div>
+                <div class="form-group">
+                    <label>Max RPS</label>
+                    <input type="number" id="scanRps" value="6" min="1" max="10">
+                </div>
+                <div class="form-group" style="display:flex;align-items:center;gap:8px;">
+                    <input type="checkbox" id="scanEvasion" style="width:auto;">
+                    <label for="scanEvasion" data-i18n="evasionLabel">Evasion (extra XSS/SQLi variants)</label>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn-secondary" onclick="closeNewScanModal()">Cancel</button>
+                    <button type="submit" class="btn-primary">Start Scan</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Scan Details Modal -->
+    <div id="scanDetailsModal" class="modal">
+        <div class="modal-content modal-large">
+            <div class="modal-header">
+                <h2 id="detailsTitle">Scan Details</h2>
+                <button class="modal-close" onclick="closeScanDetailsModal()">×</button>
+            </div>
+            <div id="scanDetailsContent"></div>
+        </div>
+    </div>
+
+    <script src="/static/app.js"></script>
+</body>
+</html>
